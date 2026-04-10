@@ -1,236 +1,103 @@
 ---
 lab:
-  title: Exercise 7 - Create Detections
-  module: Learning Path 9 - Create detections and perform investigations using Microsoft Sentinel
-  description: In this task, you will create a detection for the first attack of the previous exercise.
-  duration: 30 minutes
-  level: 300
-  islab: true
+    title: 'Exercise 7 - Investigate Incidents'
+    module: 'Learning Path 9 - Create detections and perform investigations using Microsoft Sentinel'
 ---
 
-# Learning Path 9 - Lab 1 - Exercise 7 - Create Detections
+# Learning Path 9 - Lab 1 - Exercise 7 - Investigate Incidents
 
 ## Lab scenario
 
-![Lab overview.](../Media/SC-200-Lab_Diagrams_Mod7_L1_Ex7.png)
+![Lab overview.](../Media/SC-200-Lab_Diagrams_Mod7_L1_Ex8.png)
 
-You are a Security Operations Analyst working at a company that implemented Microsoft Sentinel. You are going to work with Log Analytics KQL queries and from there, you will create custom analytics rules to help discover threats and anomalous behaviors in your environment.
+You are a Security Operations Analyst working at a company that implemented Microsoft Sentinel. You already created Scheduled and Microsoft Security Analytics rules. The Fusion and Anomalies Analytics rules are also enabled in your environment. Now is the time to investigate the Incidents created by them.
 
-Analytics rules search for specific events or sets of events across your environment, alert you when certain event thresholds or conditions are reached, generate incidents for your SOC to triage and investigate, and respond to threats with automated tracking and reMediation processes.
+An incident can include multiple alerts. It is an aggregation of all the relevant evidence for a specific investigation. The properties related to the alerts, such as severity and status, are set at the incident level. After you let Microsoft Sentinel know what kinds of threats you are looking for and how to find them, you can monitor detected threats by investigating incidents.
 
 >**Important:** The lab exercises for Learning Path #9 are in a *standalone* environment. If you exit the lab before completing it, you will be required to re-run the configurations again.
 
 ### Estimated time to complete this lab: 30 minutes
 
-### Task 1: Persistence Attack Detection
+### Task 1: Investigate an incident
 
->**Important:** The next steps are done in a different machine than the one you were previously working. Look for the Virtual Machine name references.
+In this task, you will investigate an incident.
 
-In this task, you will create a detection for the first attack of the previous exercise.
+>**Note:** Microsoft Sentinel has been predeployed in your Azure subscription with the name **sentinelworkspace-01**, and the required *Content hub* solutions have been installed.
 
->**Note:** Microsoft Sentinel has been predeployed in your Azure subscription with the name **defenderWorkspace**, and the required *Content Hub* solutions have been installed.
+1. Sign in to the **WIN1** virtual machine using the provided credentials.
 
-1. Log in to WIN1 virtual machine as Admin with the password: **Pa55w.rd**.  
+1. Open **Microsoft Edge** and navigate to **Microsoft Defender XDR** at `https://security.microsoft.com`.
 
-1. In the Edge browser, navigate to the Azure portal at <https://portal.azure.com>.
+1. In the **Sign in** dialog box, copy, and paste in the **Tenant Email** account provided by your lab hosting provider and then select **Next**.
 
-1. In the **Sign in** dialog box, copy and paste in the **Tenant Email** account provided by your lab hosting provider and then select **Next**.
+1. In the **Enter password** dialog box, copy, and paste in the **Tenant Password** provided by your lab hosting provider and then select **Sign in**.
 
-1. In the **Enter password** dialog box, copy and paste in the **Tenant Password** provided by your lab hosting provider and then select **Sign in**.
+    >**Note:** You may be prompted to enter the *Temporary Access Pass* (TAP) instead of a password. This is also provided in the resources tab. If prompted, copy and paste the TAP value and select **Sign in**.
 
-1. In the Search bar of the Azure portal, type *Sentinel*, then select **Microsoft Sentinel**.
+1. In the Microsoft Defender navigation menu, scroll down and expand the **Investigation & response** section.
 
-1. Select the Microsoft Sentinel **defenderWorkspace**.
+1. Expand the **Incidents & alerts** section and select **Incidents**.
 
-1. Select **Logs** from the *General* section.
+1. Review the list of incidents.
 
-1. **Run** the following KQL Statement again to recall the tables where we have this data:
-
-    ```KQL
-    search "temp\\startup.bat"
-    ```
-
-    >**Note:** A result with the event might take up to 5 minutes to appear. Wait until it does. If it does not appear, make sure you have rebooted WINServer as instructed in the previous exercise and that you have completed the Task #3 of the Learning Path 6 Lab, Exercise 2.
-
-1. The table *SecurityEvent* looks to have the data already normalized and easy for us to query. Expand the row to see all the columns related to the record.
-
-1. From the results, we now know that the Threat Actor is using reg.exe to add keys to the Registry key and the program is located in C:\temp. **Run** the following statement to replace the *search* operator with the *where* operator in our query:
-
-    ```KQL
-    SecurityEvent 
-    | where Activity startswith "4688" 
-    | where Process == "reg.exe" 
-    | where CommandLine startswith "REG" 
-    ```
-
-1. It is important to help the Security Operations Center Analyst by providing as much context about the alert as you can. This includes projecting Entities for use in the investigation graph. **Run** the following query:
-
-    ```KQL
-    SecurityEvent 
-    | where Activity startswith "4688" 
-    | where Process == "reg.exe" 
-    | where CommandLine startswith "REG" 
-    | extend timestamp = TimeGenerated, HostCustomEntity = Computer, AccountCustomEntity = SubjectUserName
-    ```
-
-1. Now that you have a good detection rule, in the Logs window, select the **+ New alert rule** in the command bar and then select **Create Microsoft Sentinel alert**. This will create a new Scheduled rule. **Hint:** You might need to select the ellipsis (...) button in the command bar.
-
-1. This starts the "Analytics rule wizard". For the *General* tab type:
-
-    |Setting|Value|
-    |---|---|
-    |Name|Startup RegKey|
-    |Description|Startup RegKey in c:\temp|
-    |Tactics|Persistence|
-    |Severity|High|
-
-1. Select **Next: Set rule logic >** button.
-
-1. On the *Set rule logic* tab, the *Rule query* should be populated already with your KQL query.
-
-1. Configure the entities under *Alert enhancement - Entity mapping* using the parameters in the table below.
-
-    |Entity|Identifier|Data Field|
-    |:----|:----|:----|
-    |Account|FullName|AccountCustomEntity|
-    |Host|Hostname|HostCustomEntity|
-
-1. For *Query scheduling* set the following:
-
-    |Setting|Value|
-    |---|---|
-    |Run Query every|5 minutes|
-    |Lookup data from the last|1 Days|
-
-    >**Note:** We are purposely generating many incidents for the same data. This enables the Lab to use these alerts.
-
-1. Leave the rest of the options with the defaults. Select **Next: Incident settings>** button.
-
-1. For the *Incident settings* tab, leave the default values and select **Next: Automated response >** button.
-
-1. On the *Automated response* tab under *Automation rules*, select **Add new**.
-
-1. Use the settings in the table to configure the automation rule.
-
-    |Setting|Value|
-    |:----|:----|
-    |Automation rule name|Startup RegKey|
-    |Trigger|When incident is created|
-    |Actions |Run playbook|
-    |playbook |Defender_XDR_Ransomware_Playbook_SecOps-Tasks|
-
-    >**Note:** You have already assigned permissions to the playbook, so it will be available.
-
-1. Select **Apply**
-
-1. Select the **Next: Review + create >** button.
+    >**Note:** The Analytics rules are generating alerts and incidents on the same specific log entry. Remember that this was done in the *Query scheduling* configuration to generate more alerts and incidents to be utilized in the lab.
   
-1. On the *Review and create* tab, select the **Save** button to create the new Scheduled Analytics rule.
+1. Select one of the **Startup RegKey** incidents.
 
-### Task 2: Privilege Elevation Attack Detection
+1. Review the incident details on the page that opened.
 
-In this task, you will create a detection for the second attack of the previous exercise.
+1. Select **Manage incident** from the toolbar. It will have a *pencil* icon.
 
->**Note:** We have configured the Local Security Policy on the WINServer machine to log 4732 events. This is configured in the *Advanced Audit Policy Configuration > System Audit Policies - Local Group Policy Object > Account Management > Audit Security Group Management: Success and failure*.
+1. On the **Manage incident** page, in the *Incident tags* field, type **RegKey** and select **RegKey (Create new)**.
 
-1. In the Microsoft Sentinel portal, select **Logs** from the General section in case you navigated away from this page.
+1. In the *Assign to* field, select the box and then select **Assign to me** from the dropdown.
 
-1. **Run** the following KQL Statement to identify any entry that refers to administrators:
+1. Verify the *Status* is set to **Active**. If not, change the status to **Active**.
 
-    ```KQL
-    search "administrators" 
-    | summarize count() by $table
-    ```
+1. Select **Save** to apply the changes and close the page.
 
-1. The result might show events from different tables, but in our case, we want to investigate the SecurityEvent table. The EventID and Event that we are looking is "4732 - A member was added to a security-enabled local group". With this, we will identify adding a member to a privileged group. **Run** the following KQL query to confirm:
+1. Review the **Attack story** tab. Select the **Run playbook** from the toolbar. **Hint**: You might need to select the ellipsis icon **(...)** to see it.
 
-    ```KQL
-    SecurityEvent 
-    | where EventID == 4732
-    | where TargetAccount == "Builtin\\Administrators"
-    ```
+1. You will see the *PostMessageTeams-OnIncident* playbook. This option help you to run playbooks manually.
 
-1. Expand the row to see all the columns related to the record. The username of the account added as Administrator does not show. The issue is that instead of storing the username, we have the Security IDentifier (SID). **Run** the following KQL to match the SID to the username that was added to the Administrators group:
+1. Close the *Run playbook on incident* blade by selecting the **X** icon in the top right.
 
-    ```KQL
-    SecurityEvent 
-    | where EventID == 4732
-    | where TargetAccount == "Builtin\\Administrators"
-    | extend Acct = MemberSid, MachId = SourceComputerId  
-    | join kind=leftouter (
-        SecurityEvent 
-        | summarize count() by TargetSid, SourceComputerId, TargetUserName 
-        | project Acct1 = TargetSid, MachId1 = SourceComputerId, UserName1 = TargetUserName) on $left.MachId == $right.MachId1, $left.Acct == $right.Acct1
-    ```
+1. Review the **Entities** window. At least the *Host* entity that we mapped within the KQL query from the previous exercise should appear. **Hint:** If no entities are shown, refresh the page.
 
-   ![Screenshot](../Media/SC200_sysmon_attack3.png)
+1. Select the ellipsis icon **(...)** from the toolbar, and then select **Tasks**.
 
-1. Extend the row to show the resulting columns, in the last one, we see the name of the added user under the *UserName1* column we *project* within the KQL query. It is important to help the Security Operations Analyst by providing as much context about the alert as you can. This includes projecting Entities for use in the investigation graph. **Run** the following query:
+1. Select **+ Add task**, type **Review who owns the machine** in the *Name* field and select **Save**.
 
-    ```KQL
-    SecurityEvent 
-    | where EventID == 4732
-    | where TargetAccount == "Builtin\\Administrators"
-    | extend Acct = MemberSid, MachId = SourceComputerId  
-    | join kind=leftouter (
-        SecurityEvent 
-        | summarize count() by TargetSid, SourceComputerId, TargetUserName 
-        | project Acct1 = TargetSid, MachId1 = SourceComputerId, UserName1 = TargetUserName) on $left.MachId == $right.MachId1, $left.Acct == $right.Acct1
-    | extend timestamp = TimeGenerated, HostCustomEntity = Computer, AccountCustomEntity = UserName1
-    ```
+1. Close the **Incident tasks** blade by selecting the **x** icon in the top right.
 
-1. Now that you have a good detection rule, in the Logs window, select **+ New alert rule** in the command bar and then select **Create Microsoft Sentinel alert**. **Hint:** You might need to select the ellipsis (...) button in the command bar.
+1. Select the new **Activity Log** button from the command bar.
 
-1. This starts the "Analytics rule wizard". For the *General* tab type:
+1. Review the actions you have taken during this exercise.
 
-    |Setting|Value|
-    |---|---|
-    |Name|**SecurityEvent Local Administrators User Add**|
-    |Description|**User added to Local Administrators group**|
-    |Tactics|**Privilege Escalation**|
-    |Severity|**High**|
+1. Close the **Incident activity log** blade by selecting the **x** icon in the top right.
 
-1. Select **Next: Set rule logic >** button.
+1. From the almost hidden left blade, select the user icon named **Unassigned**. The new incident experience allows quick changes from here.
 
-1. On the *Set rule logic* tab, the *Rule query* should be populated already with you KQL query, as well the entities under *Alert enhancement - Entity mapping*.
+1. Select **Assign to me** and then scroll down to select **Apply** to save the changes.
 
-    |Entity|Identifier|Data Field|
-    |:----|:----|:----|
-    |Account|FullName|AccountCustomEntity|
-    |Host|Hostname|HostCustomEntity|
+1. Expand the left blade by selecting the **>>** icon. and then select the **Investigate** button.
 
-1. If **Hostname** isn't selected for *Host* Entity, select it from the drop-down list and use the parameters in the preceding table to populate the fields.
+    >**Hint:** If the icons are too small for your screen, select **(+)** to magnify them.
 
-1. For *Query scheduling* set the following:
+1. **Hover** the WINServer entity icon and wait for new *exploration queries* to be shown. It looks that *Related Alerts* has more data on it. Select the name of the exploration query **Related Alerts** to bring them to the investigation graph or select **Events >** to investigate them with a KQL query.
 
-    |Setting|Value|
-    |---|---|
-    |Run Query every|5 minutes|
-    |Lookup data from the last|1 Days|
+1. Close the query window by selecting the **X** icon at the top right to go back to the **Investigation** page.
 
-    >**Note:** We are purposely generating many incidents for the same data. This enables the Lab to use these alerts.
+1. Now select the **WINServer** entity, a window on the right opens for more detailed information. Review the **Info** page.
 
-1. Leave the rest of the options with the defaults. Select **Next: Incident settings>** button.
+1. Select **Timeline** button. Hover the incidents and see which things on the graph occurred at what point in time.
 
-1. For the *Incident settings* tab, leave the default values and select **Next: Automated response >** button.
+1. Select **Entities** button and review the *Entities* and *Alerts* related to *WINServer*.
 
-1. On the *Automated response* tab under *Automation rules*, select **Add new**.
+1. Close the investigation graph by selecting the **X** icon at the top right of the page.
 
-1. Use the settings in the table to configure the automation rule.
+1. Back in the incident page, in the left pane select **Active Status** and select **Closed**. 
 
-   |Setting|Value|
-   |:----|:----|
-   |Automation rule name|SecurityEvent Local Administrators User Add|
-   |Trigger|When incident is created|
-   |Actions |Run playbook|
-   |playbook |Defender_XDR_Ransomware_Playbook_SecOps-Tasks|
-
-   >**Note:** You have already assigned permissions to the playbook, so it will be available.
-
-1. Select **Apply**
-
-1. Select the **Next: Review and create >** button.
-  
-1. On the *Review and create* tab, select the **Create** button to create the new Scheduled Analytics rule.
+1. In the **Select classification** drop-down review the different options. After that, select **True positive - suspicious activity** and then select **Apply**.
 
 ## Proceed to Exercise 8

@@ -1,84 +1,167 @@
 ---
 lab:
-  title: Exercise 9 - Create ASIM parsers
-  module: Learning Path 9 - Create detections and perform investigations using Microsoft Sentinel
-  description: You're a Security Operations Analyst working at a company that implemented Microsoft Sentinel. You need to model ASIM parsers for a specific Windows registry event. These parsers will be finalized at a later time following the Advanced Security Information Model (ASIM) Registry Event normalization schema reference.
-  duration: 30 minutes
-  level: 200
-  islab: true
-  primarytopics:
-    - Microsoft Sentinel
-    - Windows
+    title: 'Exercise 9 - Create workbooks'
+    module: 'Learning Path 9 - Create detections and perform investigations using Microsoft Sentinel'
 ---
 
-# Learning Path 9 - Lab 1 - Exercise 9 - Deploy ASIM parsers
+# Learning Path 9 - Lab 1 - Exercise 9 - Create workbooks
 
 ## Lab scenario
 
-![Lab overview.](../Media/SC-200-Lab_Diagrams_Mod7_L1_Ex9.png)
+![Lab overview.](../Media/SC-200-Lab_Diagrams_Mod7_L1_Ex10.png)
 
-You're a Security Operations Analyst working at a company that implemented Microsoft Sentinel. You need to model ASIM parsers for a specific Windows registry event. These parsers will be finalized at a later time following the [Advanced Security Information Model (ASIM) Registry Event normalization schema reference](https://docs.microsoft.com/azure/sentinel/registry-event-normalization-schema).
+You are a Security Operations Analyst working at a company that implemented Microsoft Sentinel. Once you have connected your data sources to Microsoft Sentinel, you can visualize and monitor the data using the Microsoft Sentinel adoption of Azure Monitor Workbooks, which provides versatility in creating custom dashboards. 
+
+Microsoft Sentinel allows you to create custom workbooks across your data, and also comes with built-in workbook templates to allow you to quickly gain insights across your data as soon as you connect a data source.
 
 >**Important:** The lab exercises for Learning Path #9 are in a *standalone* environment. If you exit the lab before completing it, you will be required to re-run the configurations again.
 
 ### Estimated time to complete this lab: 30 minutes
 
-### Task 1: Deploy the Registry Schema ASIM parsers
+### Task 1: Explore workbook templates
 
-In this task, you'll review the Registry Schema parsers that are included with the Microsoft Sentinel deployment.
+In this task, you will explore the Microsoft Sentinel workbook templates.
 
->**Note:** Microsoft Sentinel has been predeployed in your Azure subscription with the name **defenderWorkspace**, and the required *Content Hub* solutions have been installed.
+>**Note:** Microsoft Sentinel has been predeployed in your Azure subscription with the name **defenderWorkspace**, and the required *Content hub* solutions have been installed.
 
-1. Log in to WIN1 virtual machine as Admin with the password: **Pa55w.rd**.  
+1. Sign in to the **WIN1** virtual machine using the provided credentials.
 
-1. In the Microsoft Edge browser, navigate to the Azure portal at <https://portal.azure.com>.
+1. Open **Microsoft Edge** browser and navigate to **Microsoft Defender XDR** at `https://security.microsoft.com`.
 
 1. In the **Sign in** dialog box, copy, and paste in the **Tenant Email** account provided by your lab hosting provider and then select **Next**.
 
 1. In the **Enter password** dialog box, copy, and paste in the **Tenant Password** provided by your lab hosting provider and then select **Sign in**.
 
-1. In the Search bar of the Azure portal, type *Sentinel*, then select **Microsoft Sentinel**.
+    >**Note:** You may be prompted to enter the *Temporary Access Pass* (TAP) instead of a password. This is also provided in the resources tab. If prompted, copy and paste the TAP value and select **Sign in**.
 
-1. Select the Microsoft Sentinel **defenderWorkspace**.
+1. In the Microsoft Defender navigation menu, scroll down and expand the **Microsoft Sentinel** section.
 
-<!--- 1. In the Edge browser, open a new tab (Ctrl+T) and navigate to the Microsoft Sentinel GitHub ASIM page <https://github.com/Azure/Azure-Sentinel/tree/master/ASIM>.
+1. Expand the **Threat Management** section and select **Workbooks**.
 
- 1. On the right pane, select the **Onboard community content** link. This will open a new tab in the Edge Browser for Microsoft Sentinel GitHub content. **Hint:** You might need to scroll right to see the link. Alternatively, follow this link instead: [Microsoft Sentinel on GitHub](https://github.com/Azure/Azure-Sentinel).
+1. Select the **Templates** tab, and search for and select the **Azure Activity** template workbook.
 
-    >**Note:** In the **ASIM** folder you can deploy templates that contain all ASIM parsers, but we will only focus on the Registry Schema.
+1. In the right details pane, scroll down and select the **View template** button.
 
-1. Scroll down and next to **Registry Event**, select the **Deploy to Azure** button.
+1. Review the contents of the workbook. It shows insights of your Azure subscription operations by collecting and analyzing the data from the Activity Log.
 
-1. For *Resource Group*, select **RG-Defender** where your Sentinel workspace resides.
+1. Return to the the **Microsoft Sentinel | Threat management | Workbooks** page in the *Defender XDR* navigation menu.
 
-1. For *Workspace*, type your Sentinel workspace name, like *uniquenameDefender*.
+### Task 2: Save and modify a workbook template
 
-1. Leave the other default values and select **Review + create**.
+In this task, you will save a workbook template and modify it.
 
-1. Select **Create** to deploy the template. Notice the Names of the different resources. 
+1. Select the **Templates** tab, and select the **Azure Activity** workbook.
 
-1. After the deployment completes return to the *Microsoft Sentinel* tab. --->
+1. Scroll down again and select the **Save** button in the *Azure Activity* workbook details pane.
 
-1. Select **Logs** under the *General* section of the navigation menu.
+1. Leave **East US** as the default value for *Region* and select **OK**.
 
-1. Open the *Schema and Filter* blade by selecting **>>** if needed.
+1. Select the **View saved workbook** button.
 
-1. Select the **Functions** tab (next to the Tables and Queries tabs). **Hint:** You might need to select the ellipsis icon **(...)** to select the tab.
+1. Select **Edit** in the command bar to enable changes in the workbook.
 
-1. In the *Search* bar type **registry**, and scroll down through the ASIM parser functions until you see the following *_Im_RegistryEvent_MicrosoftWindowsEventxxx*for Microsoft Windows under the *Microsoft Sentinel* heading.
+1. Scroll down to the **Caller activities** area, look at the color of the *Activities* column since we are going to format those columns. Select the **Edit** button below the grid.
 
-    >**Note:** We're using the xxx in the ASIM parser function name to account for version changes. At the time this lab was updated the function was _Im_RegistryEvent_MicrosoftWindowsEvent*V02*.
+1. Select the **Vertical layout** button, it is located to the right of the *Run Query* command bar. **Hint:** This button only appears if there is data from the KQL query.
 
-1. Hover over the **_Im_RegistryEvent_MicrosoftWindowsEventxxx** ASIM function and then select **Load the function code** in the popup window.
+1. Select the **Visual Formatting** tab in the command bar, it is the *bar chart* icon.
 
-1. Review the KQL that is parsing the Event ID 4657 to simplifying your analysis of the data in the Microsoft Sentinel workspace.
+1. In the **Visualization settings**, expand the **Column settings**.
 
-    >**Hint:** Typing ctrl+f in the code window brings up *Find* and makes searching for *EventID: 4657* much easier.
+1.  In the **Columns** list, select **Activities**.
 
-1. In *Logs* Open a New Query tab.
+1. Change the value for **Column renderer** to **Heatmap**. For **Color palette**, scroll down to select **Categorical**.
 
-1. Go back to the *Schema and Filter* blade and now hover the **_Im_RegistryEvent_MicrosoftWindowsEventxxx** *Registry Event ASIM filtering parser for Microsoft Windows Events and Security Events* and then select **Use in editor**.
+1. Notice the change in the **Activities** column.
 
-1. **Run** the ASIM function query. If you've completed the previous lab exercises you should see results and noerror messages.
+1. Select **Done Editing** at the bottom of the query (not the top menu).
 
-## Proceed to Exercise 10
+1. Now select **Done Editing** at the top menu, and then select the **Save** icon. 
+
+1. Return to the the **Microsoft Sentinel | Threat management | Workbooks** page in the *Defender XDR* navigation menu.
+
+1. You should see your new workbook under the **My workbooks** tab with the name **Azure Activity**.
+
+### Task 3: Create a Workbook
+
+In this task, you will create a new workbook with advanced visualizations.
+
+1. You should be back at the **Workbooks** area of Microsoft Sentinel.
+
+1. Select **+ Add workbook** to create a new workbook from scratch. 
+
+    >**Note:** Although it is a new workbook, a startup template is used.
+
+1. To edit the workbook, select **Edit** from the top, main menu.
+
+1. Select the **Edit** button next to paragraph of the workbook.
+
+1. Type *# My workbook* in a new line on top of **## New workbook**.
+
+1. Select **Done Editing** on the bottom of this section, *Editing text item: text - 2*. Notice that your header increased size and name changed.
+
+1. Select **Edit** next to the only visible barchart graph.
+
+1. Review the KQL statement that provides a *union* statement of counts across all tables.
+
+1. Scroll down and select the **Cancel** on the bottom menu, for the *Editing query item: query - 2*.
+
+1. Select **Dropdown** arrow next to the *Edit* button of the barchart graph, then select **+ Add**, then select **Add data source + visualization**.
+
+1. Type *SecurityEvent* into the **Logs (Analytics) Query** box.
+
+1. Change the *Time Range* to **Last hour**.
+
+1. Change the *Visualization* to **Time chart**.
+
+1. Select the **Visual Formatting** tab in the command bar, it is the *bar chart* icon.
+
+1. Scroll down and select **Size** under *Layout Settings*.
+
+1. Select the **Make this item a custom width** box.
+
+1. Set the *Percent width* to **25** and *Maximum width* to **25**.
+
+1. Now select **Advanced Settings** tab from the query's command bar.
+
+1. Select **Show refresh icon when not editing** box.
+
+1. Scroll down and select **Done Editing** on the bottom menu, for the new *Editing query item: query - 2*.
+
+1. Scroll down and at the bottom of the workbook select **+ Add**, then select **Add data source + visualization**..
+
+1. Type **SecurityEvent** into the query box.
+
+1. Change the *Time Range* to **Last hour**.
+
+1. Change the *Visualization* to **Grid**.
+
+1. Select the **Visual Formatting** tab in the command bar, it is the *bar chart* icon.
+
+1. Scroll down and select **Size** under *Layout Settings*.
+
+1. Select the **Make this item a custom width** box.
+
+1. Set the *Percent width* to **75** and *Maximum width* to **75**.
+
+1. Scroll down and select **Done Editing** on the bottom menu, for the new *Editing query item: query - 3*.
+
+1. Select **Done Editing** in Workbook's top command bar.
+
+1. Select the **Save** icon, 
+
+1. In the popup box, change the *Title* to **My Workbook**.
+
+1. Leave other values as default.
+
+1. Select **Save** to commit the changes. 
+
+1. Return to the the **Microsoft Sentinel | Threat management | Workbooks** page in the *Defender XDR* navigation menu.
+
+1. Back in the **Workbooks** page, select the **My workbooks** tab.
+
+1. Select the workbook you just created, **My workbook**.
+
+1. On the right pane, select **View saved workbook** to review your workbook.
+
+## You have completed the lab.
