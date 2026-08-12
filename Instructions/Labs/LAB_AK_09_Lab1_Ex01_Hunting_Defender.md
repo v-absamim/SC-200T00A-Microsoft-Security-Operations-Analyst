@@ -213,8 +213,6 @@ In this task, you'll create a hunting query, and create a Livestream.
 
    >**Important:** Please paste any KQL queries first in Notepad and then copy from there to the *New query* tab to avoid any errors.
 
-   >**Note:** If you receive the message, "security.microsoft.com wants to.. See text and images copied to the clipboard", select **Allow**.
-
     ```KQL
     let lookback = 2d; 
     SecurityEvent
