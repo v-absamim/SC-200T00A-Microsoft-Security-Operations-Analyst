@@ -1,6 +1,6 @@
 ---
 lab:
-    title: Exercise 1 - Perform Threat Hunting with Microsoft Sentinel in Microsoft Defender XDR
+  title: Exercise 1 - Perform Threat Hunting with Microsoft Sentinel in Microsoft Defender XDR
   module: Learning Path 9 - Perform threat hunting in Microsoft Sentinel
   description: The log data created in the Learning Path 9 lab exercises will not be available in this lab without rerunning the following prerequisite tasks.
   duration: 60 minutes
