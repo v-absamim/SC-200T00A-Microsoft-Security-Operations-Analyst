@@ -98,33 +98,31 @@ In this task, you create a watchlist in Microsoft Sentinel.
 
 ### Task 2: Create a Threat Indicator
 
-In this task, you create an indicator in Microsoft Sentinel.
+In this task, you create a threat indicator using Microsoft Defender Threat Intelligence.
 
-1. In Microsoft Sentinel, expand the **Threat management** menu, and select the **Threat intelligence** option.
+1. In the Microsoft Defender navigation menu, expand **Threat intelligence**, and select **Intel explorer**.
 
-1. Select the **Open Intel management** button.
-
-    >**Note:** This opens a page for consolidated *Intel management* within the *Microsoft Threat Intelligence* section of Defender XDR.
+1. Select the **Indicators** tab.
 
 1. Select **+ New** from the command bar.
 
-1. Select the **TI Object**.
-
-1. From the *Object type* dropdown, select **Indicator**.
+1. From the **Object type** dropdown, select **Indicator**.
 
 1. Select the **+ New observable** dropdown and select **Domain name**.
 
-1. For Domain, enter a domain name, for example type *contoso.com*.
+1. For Domain, enter a domain name, for example type `contoso.com`.
 
     >**Important:** If there are existing indicators for the same domain, you should append your initials or a unique identifier such as your student ID to avoid conflicts.
 
 1. In the **Name** field, enter the same value used for the Domain.
 
-1. In the *Indicator types*, select **malicious-activity**.
+1. In the **Indicator types**, select **Malicious activity**.
 
 1. Set the **Valid from** field to today's date.
 
-1. Scroll down to the **Description** and enter *This domain is known to be malicious*.
+1. Set the **Valid until** field to a date three days from today.
+
+1. Scroll down to the **Description** and enter `This domain is known to be malicious`.
 
 1. Select **Add**.
 
